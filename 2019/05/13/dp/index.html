@@ -14,7 +14,7 @@
 <meta property="og:description" content="目录 动态规划解决了什么 什么是动态规划 典型的动态规划  1. 动态规划解决了什么我们知道递归思想就是将大问题拆分成小问题进行攻破;比如钢条切割问题：给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大 我们很容易想到通过递归进行求解：假设price(x)代表长度x的钢材的最大收益,我们很容易将问题进行递归分解： price(n) = max(pi, price(1)+price(">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/3/31/169d43d1f20919a5?w=878&h=99&f=png&s=35326">
-<meta property="og:updated_time" content="2019-05-13T03:51:00.505Z">
+<meta property="og:updated_time" content="2019-05-13T03:53:18.629Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="什么是动态规划">
 <meta name="twitter:description" content="目录 动态规划解决了什么 什么是动态规划 典型的动态规划  1. 动态规划解决了什么我们知道递归思想就是将大问题拆分成小问题进行攻破;比如钢条切割问题：给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大 我们很容易想到通过递归进行求解：假设price(x)代表长度x的钢材的最大收益,我们很容易将问题进行递归分解： price(n) = max(pi, price(1)+price(">
@@ -86,19 +86,19 @@
 <li>典型的动态规划</li>
 </ol>
 <h2 id="1-动态规划解决了什么"><a href="#1-动态规划解决了什么" class="headerlink" title="1. 动态规划解决了什么"></a>1. 动态规划解决了什么</h2><p>我们知道<strong>递归</strong>思想就是将大问题拆分成小问题进行攻破;<br><br>比如钢条切割问题：<br>给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大<br><img src="https://user-gold-cdn.xitu.io/2019/3/31/169d43d1f20919a5?w=878&amp;h=99&amp;f=png&amp;s=35326" alt="钢条切割"></p>
-<p>我们很容易想到通过递归进行求解：<br><br><br>假设price(x)代表长度x的钢材的最大收益,我们很容易将问题进行递归分解：<br><br></p>
+<p>我们很容易想到通过递归进行求解：<br>假设price(x)代表长度x的钢材的最大收益,我们很容易将问题进行递归分解：</p>
 <pre><code>price(n) = max(pi, price(1)+price(n-1), price(2)+price(n-2),....,price(n-1)+price(1) );
-</code></pre><p>比如，我们求解一根长度为4的钢材的切割方式：<br><br><br>就是求取各种组合的最大利益<br><br></p>
+</code></pre><p>比如，我们求解一根长度为4的钢材的切割方式：<br>就是求取各种组合的最大利益</p>
 <pre><code>price(4) = max(p4, price(1) + price(3), price(2) + price(2), price(3) + price(1));
-</code></pre><p><br><br>那么接下来就是求解，price(3)、price(2)、price(1)的问题了；</p>
+</code></pre><p>那么接下来就是求解，price(3)、price(2)、price(1)的问题了；</p>
 <p>这种自顶向下分解递归的方式肯定是可以解决这个钢条切割的问题的，但是有没有缺陷？</p>
-<p>有的，还不小，就是效率问题。<br><br><br>随着x的增大，递归的效率会越来越低，运行速度会很慢，因为什么？<br><br></p>
+<p>有的，还不小，就是效率问题。<br>随着x的增大，递归的效率会越来越低，运行速度会很慢，因为什么？</p>
 <pre><code>因为它在反复求解相同的问题
 在price(3)时，其已经计算过3的最优解了，且2、1的肯定也有了；
 作为人类，我们自然而然就会将这个结果记住，并用于下次计算；
 但是递归不会，在price(4)的时候，其仍然还会计算price(3),price(2),price(1），不管是不是上次递归已经计算过了。
 </code></pre><p>那么解决这个问题的很简单的办法是什么？</p>
-<p>没错，就是<strong>记忆</strong><br><br><br>将先前解决的子问题，进行存储，以减少重复计算！<br>这就是<strong>带备忘的递归</strong></p>
+<p>没错，就是<strong>记忆</strong><br>将先前解决的子问题，进行存储，以减少重复计算！<br>这就是<strong>带备忘的递归</strong></p>
 <p>好了，貌似我们讨论到现在都是说的递归问题，其实呢，到目前为止，我们已经讲完了动态规划的本质：</p>
 <p><strong>以空间换时间，解决最优化问题}</strong></p>
 <h2 id="2-什么是动态规划"><a href="#2-什么是动态规划" class="headerlink" title="2. 什么是动态规划"></a>2. 什么是动态规划</h2><pre><code>1.动态规划是通过组合子问题的解来解决原问题
@@ -111,12 +111,12 @@
 3.计算最优解的值，通常自底向上
 4.利用计算出的信息构造一个最优解
 </code></pre><p>好了，让我们用动态规划解一下钢条切割问题：</p>
-<p><strong>1.刻画一个最优解的结构特征</strong><br><br><br>递归法中已经刻画的很清楚了</p>
-<p><strong>2.递归的定义最优解的值</strong><br><br><br>公式也在上面写过了<br><br></p>
-<p><strong>3.计算最优解的值，通常自底向上</strong><br><br><br>通过带备忘的自顶向下递归法，我们成功的比较高效的解决了钢铁切割的问题，这也是动态规划的一种方式,有没有其他方式？<br><br><br>有的，对应于自顶而下，我们采用自底而上的方式，将子问题按照从小到大的顺序进行求解，当然还是得有备忘机制。<br><br></p>
+<p><strong>1.刻画一个最优解的结构特征</strong><br>递归法中已经刻画的很清楚了</p>
+<p><strong>2.递归的定义最优解的值</strong><br>公式也在上面写过了</p>
+<p><strong>3.计算最优解的值，通常自底向上</strong><br>通过带备忘的自顶向下递归法，我们成功的比较高效的解决了钢铁切割的问题，这也是动态规划的一种方式,有没有其他方式？<br>有的，对应于自顶而下，我们采用自底而上的方式，将子问题按照从小到大的顺序进行求解，当然还是得有备忘机制。</p>
 <p>大部分情况下，自顶而下和自底而上的效率是近似的；但是呢，在某些特殊情况，自顶向下方法并未真正的递归考察所有可能的子问题；而且自底向上也没有频繁的递归函数的开销；</p>
 <p>所以，一般动态规划都是采用自底向上的方法，将复杂的问题，变成了简单的多项式相加。</p>
-<p><strong>4.利用计算出的信息构造一个最优解</strong><br><br><br>这条就更简单了，既然你算法都写出来了，在算法的途中，加上最优解的存储及输出就可以了，</p>
+<p><strong>4.利用计算出的信息构造一个最优解</strong><br>这条就更简单了，既然你算法都写出来了，在算法的途中，加上最优解的存储及输出就可以了，</p>
 <pre><code>比如动态规划钢铁切割问题，在算法最初，我们关心的是price(n)，计算出最佳的收益；
 最后我们只要在编写出的算法中，加上输出钢铁的分割就可以了。
 </code></pre><h2 id="3-典型的动态规划"><a href="#3-典型的动态规划" class="headerlink" title="3. 典型的动态规划"></a>3. 典型的动态规划</h2><p>钢铁切割问题本身就是个典型的动态规划，除了这个例子，还有：</p>
@@ -132,9 +132,6 @@
 2.具有重叠子问题性质
     问题的递归算法会反复求解相同的子问题
 </code></pre><p>算法的精髓在于，其没有最好，只有最合适</p>
-<p><br></p>
-<pre><code>其他相关章节
-</code></pre><p>算法相关文章之一：<a href="https://juejin.im/post/5ca0a8cbe51d4516b349e15d" target="_blank" rel="noopener">《简单说说二叉搜索树》</a><br><br><br>算法相关文章之二：<a href="https://juejin.im/post/5c91e7386fb9a070c6188259" target="_blank" rel="noopener">《B树，一点都不神秘》</a><br><br><br>算法相关文章之三：<a href="https://juejin.im/post/5c91e9326fb9a070df165e81" target="_blank" rel="noopener">《B树很简单,插入so easy》</a><br><br><br>算法相关文章之四：<a href="https://juejin.im/post/5ca0d12cf265da30c7041fa4" target="_blank" rel="noopener">《什么是动态规划》</a><br><br><br>算法相关文章之五：<a href="https://juejin.im/post/5ca2093bf265da30c0542c70" target="_blank" rel="noopener">《LCS,给你一个不一样的模糊匹配》</a><br><br></p>
 
   </article>
   <footer class="f-cf">
