@@ -5,19 +5,19 @@
   
   <title>什么是动态规划 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="目录 动态规划解决了什么 什么是动态规划 典型的动态规划  1. 动态规划解决了什么我们知道递归思想就是将大问题拆分成小问题进行攻破;比如钢条切割问题：给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大 我们很容易想到通过递归进行求解：假设price(x)代表长度x的钢材的最大收益,我们很容易将问题进行递归分解： price(n) = max(pi, price(1)+price(">
+  <meta name="description" content="目录 动态规划解决了什么 什么是动态规划 典型的动态规划  1. 动态规划解决了什么 我们知道递归思想就是将大问题拆分成小问题进行攻破;比如钢条切割问题：给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大 我们很容易想到通过递归进行求解：假设price(x)代表长度x的钢材的最大收益,我们很容易将问题进行递归分解： price(n) = max(pi, price(1)+price">
 <meta name="keywords" content="算法">
 <meta property="og:type" content="article">
 <meta property="og:title" content="什么是动态规划">
 <meta property="og:url" content="http://yoursite.com/2019/05/13/dp/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="目录 动态规划解决了什么 什么是动态规划 典型的动态规划  1. 动态规划解决了什么我们知道递归思想就是将大问题拆分成小问题进行攻破;比如钢条切割问题：给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大 我们很容易想到通过递归进行求解：假设price(x)代表长度x的钢材的最大收益,我们很容易将问题进行递归分解： price(n) = max(pi, price(1)+price(">
+<meta property="og:description" content="目录 动态规划解决了什么 什么是动态规划 典型的动态规划  1. 动态规划解决了什么 我们知道递归思想就是将大问题拆分成小问题进行攻破;比如钢条切割问题：给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大 我们很容易想到通过递归进行求解：假设price(x)代表长度x的钢材的最大收益,我们很容易将问题进行递归分解： price(n) = max(pi, price(1)+price">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/3/31/169d43d1f20919a5?w=878&h=99&f=png&s=35326">
-<meta property="og:updated_time" content="2019-05-13T03:53:18.629Z">
+<meta property="og:updated_time" content="2019-05-13T03:58:14.427Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="什么是动态规划">
-<meta name="twitter:description" content="目录 动态规划解决了什么 什么是动态规划 典型的动态规划  1. 动态规划解决了什么我们知道递归思想就是将大问题拆分成小问题进行攻破;比如钢条切割问题：给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大 我们很容易想到通过递归进行求解：假设price(x)代表长度x的钢材的最大收益,我们很容易将问题进行递归分解： price(n) = max(pi, price(1)+price(">
+<meta name="twitter:description" content="目录 动态规划解决了什么 什么是动态规划 典型的动态规划  1. 动态规划解决了什么 我们知道递归思想就是将大问题拆分成小问题进行攻破;比如钢条切割问题：给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大 我们很容易想到通过递归进行求解：假设price(x)代表长度x的钢材的最大收益,我们很容易将问题进行递归分解： price(n) = max(pi, price(1)+price">
 <meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2019/3/31/169d43d1f20919a5?w=878&h=99&f=png&s=35326">
   
   <link rel="stylesheet" href="/css/index.css">
@@ -85,7 +85,8 @@
 <li>什么是动态规划</li>
 <li>典型的动态规划</li>
 </ol>
-<h2 id="1-动态规划解决了什么"><a href="#1-动态规划解决了什么" class="headerlink" title="1. 动态规划解决了什么"></a>1. 动态规划解决了什么</h2><p>我们知道<strong>递归</strong>思想就是将大问题拆分成小问题进行攻破;<br><br>比如钢条切割问题：<br>给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大<br><img src="https://user-gold-cdn.xitu.io/2019/3/31/169d43d1f20919a5?w=878&amp;h=99&amp;f=png&amp;s=35326" alt="钢条切割"></p>
+<h2 id="1-动态规划解决了什么"><a href="#1-动态规划解决了什么" class="headerlink" title="1. 动态规划解决了什么"></a>1. 动态规划解决了什么</h2><hr>
+<p>我们知道<strong>递归</strong>思想就是将大问题拆分成小问题进行攻破;<br>比如钢条切割问题：<br>给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大<br><img src="https://user-gold-cdn.xitu.io/2019/3/31/169d43d1f20919a5?w=878&amp;h=99&amp;f=png&amp;s=35326" alt="钢条切割"></p>
 <p>我们很容易想到通过递归进行求解：<br>假设price(x)代表长度x的钢材的最大收益,我们很容易将问题进行递归分解：</p>
 <pre><code>price(n) = max(pi, price(1)+price(n-1), price(2)+price(n-2),....,price(n-1)+price(1) );
 </code></pre><p>比如，我们求解一根长度为4的钢材的切割方式：<br>就是求取各种组合的最大利益</p>
@@ -96,12 +97,14 @@
 <pre><code>因为它在反复求解相同的问题
 在price(3)时，其已经计算过3的最优解了，且2、1的肯定也有了；
 作为人类，我们自然而然就会将这个结果记住，并用于下次计算；
-但是递归不会，在price(4)的时候，其仍然还会计算price(3),price(2),price(1），不管是不是上次递归已经计算过了。
+但是递归不会，在price(4)的时候，其仍然还会计算price(3),price(2),price(1），
+不管是不是上次递归已经计算过了。
 </code></pre><p>那么解决这个问题的很简单的办法是什么？</p>
 <p>没错，就是<strong>记忆</strong><br>将先前解决的子问题，进行存储，以减少重复计算！<br>这就是<strong>带备忘的递归</strong></p>
 <p>好了，貌似我们讨论到现在都是说的递归问题，其实呢，到目前为止，我们已经讲完了动态规划的本质：</p>
 <p><strong>以空间换时间，解决最优化问题}</strong></p>
-<h2 id="2-什么是动态规划"><a href="#2-什么是动态规划" class="headerlink" title="2. 什么是动态规划"></a>2. 什么是动态规划</h2><pre><code>1.动态规划是通过组合子问题的解来解决原问题
+<h2 id="2-什么是动态规划"><a href="#2-什么是动态规划" class="headerlink" title="2. 什么是动态规划"></a>2. 什么是动态规划</h2><hr>
+<pre><code>1.动态规划是通过组合子问题的解来解决原问题
 2.动态规划应用于子问题重叠的情况，即不同的子问题具有公共的子子问题
 3.动态规划算法对每个子子问题只求解一次
 4.动态规划通常用来求解最优化问题
@@ -119,7 +122,8 @@
 <p><strong>4.利用计算出的信息构造一个最优解</strong><br>这条就更简单了，既然你算法都写出来了，在算法的途中，加上最优解的存储及输出就可以了，</p>
 <pre><code>比如动态规划钢铁切割问题，在算法最初，我们关心的是price(n)，计算出最佳的收益；
 最后我们只要在编写出的算法中，加上输出钢铁的分割就可以了。
-</code></pre><h2 id="3-典型的动态规划"><a href="#3-典型的动态规划" class="headerlink" title="3. 典型的动态规划"></a>3. 典型的动态规划</h2><p>钢铁切割问题本身就是个典型的动态规划，除了这个例子，还有：</p>
+</code></pre><h2 id="3-典型的动态规划"><a href="#3-典型的动态规划" class="headerlink" title="3. 典型的动态规划"></a>3. 典型的动态规划</h2><hr>
+<p>钢铁切割问题本身就是个典型的动态规划，除了这个例子，还有：</p>
 <pre><code>最长公共子序列
 最优二叉搜索树
 矩阵链乘法
