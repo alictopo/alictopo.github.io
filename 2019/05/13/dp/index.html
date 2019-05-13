@@ -14,7 +14,7 @@
 <meta property="og:description" content="目录 动态规划解决了什么 什么是动态规划 典型的动态规划  1. 动态规划解决了什么我们知道递归思想就是将大问题拆分成小问题进行攻破;比如钢条切割问题：给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大 我们很容易想到通过递归进行求解：假设price(x)代表长度x的钢材的最大收益,我们很容易将问题进行递归分解： price(n) = max(pi, price(1)+price(">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/3/31/169d43d1f20919a5?w=878&h=99&f=png&s=35326">
-<meta property="og:updated_time" content="2019-05-13T03:49:23.625Z">
+<meta property="og:updated_time" content="2019-05-13T03:51:00.505Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="什么是动态规划">
 <meta name="twitter:description" content="目录 动态规划解决了什么 什么是动态规划 典型的动态规划  1. 动态规划解决了什么我们知道递归思想就是将大问题拆分成小问题进行攻破;比如钢条切割问题：给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大 我们很容易想到通过递归进行求解：假设price(x)代表长度x的钢材的最大收益,我们很容易将问题进行递归分解： price(n) = max(pi, price(1)+price(">
@@ -85,7 +85,7 @@
 <li>什么是动态规划</li>
 <li>典型的动态规划</li>
 </ol>
-<h2 id="1-动态规划解决了什么"><a href="#1-动态规划解决了什么" class="headerlink" title="1. 动态规划解决了什么"></a>1. 动态规划解决了什么</h2><p>我们知道<strong>递归</strong>思想就是将大问题拆分成小问题进行攻破;<br>比如钢条切割问题：<br>给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大<br><img src="https://user-gold-cdn.xitu.io/2019/3/31/169d43d1f20919a5?w=878&amp;h=99&amp;f=png&amp;s=35326" alt="钢条切割"></p>
+<h2 id="1-动态规划解决了什么"><a href="#1-动态规划解决了什么" class="headerlink" title="1. 动态规划解决了什么"></a>1. 动态规划解决了什么</h2><p>我们知道<strong>递归</strong>思想就是将大问题拆分成小问题进行攻破;<br><br>比如钢条切割问题：<br>给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大<br><img src="https://user-gold-cdn.xitu.io/2019/3/31/169d43d1f20919a5?w=878&amp;h=99&amp;f=png&amp;s=35326" alt="钢条切割"></p>
 <p>我们很容易想到通过递归进行求解：<br><br><br>假设price(x)代表长度x的钢材的最大收益,我们很容易将问题进行递归分解：<br><br></p>
 <pre><code>price(n) = max(pi, price(1)+price(n-1), price(2)+price(n-2),....,price(n-1)+price(1) );
 </code></pre><p>比如，我们求解一根长度为4的钢材的切割方式：<br><br><br>就是求取各种组合的最大利益<br><br></p>
