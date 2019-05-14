@@ -442,7 +442,7 @@
 <p>假设索引的实际内容如下：<br>1, 2, 8, x, x, x<br>1, 2, 9, x, x, x<br>1, 2,10, x, x, x</p>
 <p>因为b=1,e=2是固定的，所以只要把g提到前面，那么排序必然是按照g来的</p>
 <p>如此一来，根据a, b, g过滤好的索引，天然就是排序好的结果</p>
-<h3 id="3-窄索引片"><a href="#3-窄索引片" class="headerlink" title="3.窄索引片"></a><strong>3.窄索引片</strong></h3><p>什么是索引片，以及什么样的索引片是窄索引片，已经在《索引》这篇中介绍过了</p>
+<h3 id="3-窄索引片"><a href="#3-窄索引片" class="headerlink" title="3. 窄索引片"></a><strong>3. 窄索引片</strong></h3><p>什么是索引片，以及什么样的索引片是窄索引片，已经在《索引》这篇中介绍过了</p>
 <p>所谓的索引片，就是优化器根据查询语句，在索引中，实际使用的用于检索的索引</p>
 <p>举个例子：select a,c,d from table1 where b = 1 and e = 2 and g &gt; 7 and c &lt; 5 order by g desc;</p>
 <p>根据优化器的逻辑：<br>如果索引是(a,b,c,d,e,g)<br>那么索引片是0，即没有索引片，因为a，在查询语句中根本就没有查询条件</p>
@@ -869,7 +869,7 @@ B树的插入
 
             
                 &nbsp;<i class="fa fa-area-chart"></i>&nbsp;站点总字数:&nbsp;
-                <span class="white-color">7.6k</span>
+                <span class="white-color">7.5k</span>
             
 
             
