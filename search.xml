@@ -4,6 +4,101 @@
   
     
     <entry>
+      <title>索引总结</title>
+      <link href="/2019/05/14/summaryindexing/"/>
+      <url>/2019/05/14/summaryindexing/</url>
+      
+        <content type="html"><![CDATA[<pre><code>                        这是数据库索引相关内容的最后一篇</code></pre><p>对于单表，我们知道了如何设计最佳索引;</p><p>但是现实中，往往比较复杂，有联合查询、嵌套查询、子查询等等；我们从以下几方面展开</p><ol><li>对优化器来说难的谓词</li><li>跨表查询</li><li>设计出色索引的步骤</li></ol><h3 id="1-对优化器来说难的谓词"><a href="#1-对优化器来说难的谓词" class="headerlink" title="1. 对优化器来说难的谓词"></a>1. 对优化器来说难的谓词</h3><p>我们来猜一猜，优化器比较难处理的谓词可能有哪些？</p><pre><code>肯定要排除AND，这足够简单；大于/小于呢，单纯来看也还行；between and呢；有范围，应该能接受，那还有什么？比如Or,这明显对优化器有点难了，为什么，因为它是不满足A，还得看B，等根据查询结果来进行判断需不需要看B；还有LIKE, 如果LIKE以%开头，那么无疑给查询带来了难度；</code></pre><p>所以呢，难的谓词有什么？</p><pre><code>对，就是or、like、in这些，没有办法通过简单的扫描得出结论的，不建议在这些列建立索引。</code></pre><p>这些谓词，我们有个统一的称呼，称呼他们为非布尔谓词。那么相反，<br><br><br>简单直接的谓词就是布尔谓词，就是好的谓词，可以建立索引</p><h3 id="2-跨表查询"><a href="#2-跨表查询" class="headerlink" title="2. 跨表查询"></a>2. 跨表查询</h3><p>跨表查询总结起来就是自个表的部分，以及连接处.</p><pre><code>1.连接处是否在索引中很重要2.就算每个单表都是最佳索引，但是如果有大量随机IO，仍然会导致查询慢select CNO, CNAME FROM TABLE1 WHERE CTYPE = 1;select DNAME FROM TABLE2 WHERE DNO = CNO AND DCOM = 2;对于TABLE1,最佳索引为（CTYPE, CNO, CNAME）；对于TABLE2,最佳索引为（DNO, DCOM, DNAME）;乍一看，如果这两表联合查询，应该没啥问题，通过CNO链接，CNO也在索引中；实际呢，在TABLE1中，CTYPE=1查出来的CNO，可能不止1个，假设1w个；那么对于没个CNO，都会触发TABLE2进行随机访问我们可以粗略大概计算一下LRTLRT = 10ms + 1w*0.01ms + 1w * 10ms对于TABLE1,数据全部在索引中，访问第一条索引发生了一次随机访问，剩余索引为顺序访问，所以是10ms + 1w*0.01ms对于TABLE2,其访问顺序取决于TABLE1得到的CNO，CTYPE=1的情况下,CNO顺序存储的概率不大，我们假设他们是分散存储的，那么每次FETCH CNO，就会导致一次随机访问索引，大概有1W*10ms的时长最终，查询速度并不理想，虽然每个表都是最佳索引，问题在哪？在于跨表查询导致的随机访问；</code></pre><p>在上述情况下，如何快速提升速度，如果在设计阶段，不妨考虑将两表合并，或者将CTYPE,也放入到TABLE2中；</p><p>往往大家特别排斥冗余数据，但是从效率的角度出发，冗余数据真的不好吗，它的维护成本和效率成本有没有好好比较一下呢？</p><p>当然如果实际运行中数据查询并不慢，并不需要纠结这些；如果能够通过宽索引或者半宽索引解决，就最好不要推翻或追加。</p><h3 id="3-设计出色索引的步骤"><a href="#3-设计出色索引的步骤" class="headerlink" title="3. 设计出色索引的步骤"></a>3. 设计出色索引的步骤</h3><pre><code>1.当表结构设计出来时，就该开始索引的设计2.用BQ或者QUBE进行索引设计检查，如果还是没办法满足需求，就要考虑合并表，减少跨表3.根据应用需要尝试继续添加必要的索引4.如果表增删改的频率很高（50次/秒），那需要用QUBE评估下最多容许添加多少索引5.根据具体的数据库调整策略6.SQL编写以后，继续使用BQ、QUBE、BJQ等方式进行检查7.发布后，使用EXPLAIN进行检查8.跟踪报告</code></pre><p><br></p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> 索引 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>如何发现和替换不合适的索引</title>
+      <link href="/2019/05/14/badindexing/"/>
+      <url>/2019/05/14/badindexing/</url>
+      
+        <content type="html"><![CDATA[<p><strong> 发现不合适的索引 </strong></p><p>触发我们考虑考虑索引是否合适的契机有两种</p><pre><code>一种是：生产环境中出现查询慢，我们急于解决现实遇到的问题；一种是：在设计实现阶段，我们希望提前发现设计不合理的索引，以免后续发布以后才出现性能问题；</code></pre><hr><hr><p>对于 <strong>$\color{red}{第一种}$</strong> 情况，我们可以通过提问来反思如何改进索引。</p><h2 id="1-1-是否所有where子句中的所有列都在索引中了？"><a href="#1-1-是否所有where子句中的所有列都在索引中了？" class="headerlink" title="1.1. 是否所有where子句中的所有列都在索引中了？"></a>1.1. 是否所有where子句中的所有列都在索引中了？</h2><p>&nbsp;<br>&nbsp;<br>&nbsp;<br>  如果没有，则添加到索引中，将索引变成半宽索引</p><h2 id="1-2-是否将所有涉及的列都加入到索引中了？"><a href="#1-2-是否将所有涉及的列都加入到索引中了？" class="headerlink" title="1.2. 是否将所有涉及的列都加入到索引中了？"></a>1.2. 是否将所有涉及的列都加入到索引中了？</h2><p>&nbsp;<br>&nbsp;<br>&nbsp;<br>  如果变成半宽索引后，还是没有解决到性能问题，那么下一个选择就是将查询中所有涉及的列都加入到索引中，形成宽索引；这样，优化器的访问只需访问索引，避免了表访问。</p><h2 id="1-3-你需要最佳索引"><a href="#1-3-你需要最佳索引" class="headerlink" title="1.3. 你需要最佳索引"></a>1.3. 你需要最佳索引</h2><p>&nbsp;<br>&nbsp;<br>&nbsp;<br>  如果上述两种方式，仍未解决性能问题，则要参考《什么是最好的索引》一文，好好考虑一下索引的设计了</p><p>&nbsp;<br>&nbsp;<br>&nbsp;<br> 例如：SELECT A FROM XXX WHERE B = 1 AND C = 2;而索引是（A, B, C）<br> 按照《索引》中的优化器逻辑，其索引片是空，即其查询将进行全索引扫描；如果索引超过10w条记录，那么查询将会很慢</p><p>&nbsp;<br>&nbsp;<br>&nbsp;<br> 但是按照上述的检查方式，第一条和第二条其都是满足的，但是该索引在一定的数量级下依然会导致查询效率慢，那么就要做第三步，对索引进行重新考虑了。</p><p> 在正式运行的系统中，建议扩充索引列，而不是新增新的索引或者更换索引列的顺序，和将带来额外的负担。</p><hr><hr><p>对于 <strong>$\color{red}{第二种}$</strong> 情况，我们可以通过系统的评估来查看索引是否合适。</p><h2 id="2-1-统计本地相应时间"><a href="#2-1-统计本地相应时间" class="headerlink" title="2.1. 统计本地相应时间**"></a>2.1. 统计本地相应时间**</h2><p>&nbsp;<br>&nbsp;<br>&nbsp;<br>直接先上结论：</p><p>&nbsp;<br>&nbsp;<br>&nbsp;<br>本地响应时间(LRT) = 随机访问的数量（TR） <em> 10ms + 顺序访问数量（TS） </em> 0.01ms + 有效FETCH数量（F） * 0.1ms</p><p>&nbsp;<br>&nbsp;<br>&nbsp;<br>什么是随机访问：就是一次磁盘IO的时间，约为10ms<br><br><br>&nbsp;<br>&nbsp;<br>&nbsp;<br>什么是顺序访问：一页包含n行，每行的时间约为0.01ms;</p><p>&nbsp;<br>&nbsp;<br>&nbsp;<br>再详细一点：<br><br><br>&nbsp;<br>&nbsp;<br>&nbsp;<br>DBMS读取一个索引或一个表行的成本，即为一次访问；<br><br><br>&nbsp;<br>&nbsp;<br>&nbsp;<br>DBMS扫描索引或表的一个片段，其中第一行的读取即为一次随机访问；<br><br><br>&nbsp;<br>&nbsp;<br>&nbsp;<br>对于后续行的读取，每行都是一次顺序访问；</p><p>&nbsp;<br>&nbsp;<br>&nbsp;<br>打个比方：<br><br><br>&nbsp;<br>&nbsp;<br>&nbsp;<br>对于去超市买10个罐头：<br><br><br>&nbsp;<br>&nbsp;<br>&nbsp;<br>随机访问就好比在超市找到罐头的货架的时间，就是10ms<br><br><br>&nbsp;<br>&nbsp;<br>&nbsp;<br>顺序访问就好比已经找到罐头的货架了，只要一个个把罐头拿下来，每个罐头的时间就是0.01ms</p><p>&nbsp;<br>&nbsp;<br>&nbsp;<br>好了，知道了随机访问和顺序访问，接下来我们知道如何确定随机访问和顺序访问的次数</p><p><strong>索引访问次数</strong></p><p>&nbsp;<br>&nbsp;<br>&nbsp;<br>可以将索引当成一张表，其行数与其包含的表的行数相同，且按照索引键值排列</p><p><strong>表访问次数</strong></p><p>&nbsp;<br>&nbsp;<br>&nbsp;<br>我们假设一次全表扫描将需要一次随机访问和N-1次顺序访问</p><hr><h2 id="2-2-举例"><a href="#2-2-举例" class="headerlink" title="2.2.举例"></a>2.2.举例</h2><p>$\color{purple}{2.1 主键索引}$</p><p>主键索引：select CNAME, CNO, CDESC from table1 where CNO = 221<br><br><br>其中CNO为主键；</p><p>索引存储如下：<br><br><br>111，<br><br><br>112，<br><br><br>113<br><br><br>…<br><br><br>221,<br><br><br>222<br><br></p><p>那么优化器是如何检索的？<br><br><br>i.  根据CNO=221，进行一次随机访问，取到221这条索引<br><br><br>ii. 根据221这条索引指向的磁盘位置,通过一次随机访问，找到数据块，得到CNAME,CDESC</p><p>那么LRT是多少？<br><br><br>很好计算：<br>两次随机访问 + 1次FETCH = 2 * 10ms + 0.1ms 约等于 20ms</p><hr><p>$\color{purple}{2.2 聚簇索引}$</p><p>select CNO, CNAME, CDESC from table1 where CTYPE = 1 and CNAME = ‘ZHANG’ order by CDESC </p><p>假设索引是（CTYPE, CNAME, CDESC）<br>假设CTYPE =1 和CNAME=’ZHANG’能从10w的索引中过滤出1000条</p><p>1000条索引如下：<br><br><br>1，’ZHANG’, 1<br><br><br>1，’ZHANG’, 2<br><br><br>….<br><br><br>1，’ZHANG’, 1000<br><br></p><p>那么LRT是多少？<br><br><br>首先，一次随机访问索引的时间，定位到索引1000条的第一行<br><br><br>其次, 1000次顺序访问索引的时间<br><br><br>然后，因CNO不在索引中，所以还需要通过索引进行磁盘查找；<br><br><br>因为是聚簇索引，所以表的顺序和索引的顺序是一致的，访问表的时间和索引是一样的，即一次随机访问表的时间，和1000次顺序访问的时间（999不好计算，我们都约等于1000）</p><p>LRT= 1次索引随机访问 + 1000次索引顺序访问 + 1次表随机访问 + 1000次表顺序访问 + 1000次FETCH<br><br><br>&nbsp;<br>&nbsp;<br>&nbsp;<br>= 10ms + 1000 <em> 0.01ms + 10ms + 1000 </em> 0.01ms + 1000 * 0.1ms<br><br><br>&nbsp;<br>&nbsp;<br>&nbsp;<br>= 140ms</p><p>$\color{purple}{2.3 非聚簇索引}$</p><p>同2.2 ，如果同样是该查询语句，但是索引变成非聚簇索引会怎么样？</p><p>很显然，表的存储会发生变化，不再是跟索引的顺序一致，并且不是连续存储了；</p><p>所以，</p><p>LRT = 1次索引随机访问 + 1000次索引顺序访问 + 1000次表随机访问 + 1000次FETCH<br><br><br>&nbsp;<br>&nbsp;<br>&nbsp;<br>= 10ms + 1000 <em> 0.01ms + 1000 </em> 10ms + 1000 * 0.1ms<br><br><br>&nbsp;<br>&nbsp;<br>&nbsp;<br>= 10s(约等于)</p><p>你看，同样的1000条索引，查询速度和2.2相差这么多！</p><p>这个索引该如何优化呢，很显然，如果它不是聚簇索引，就要将CNO纳入到索引中来，避免表的随机访问；将所有的访问都回到索引内部</p><p>$\color{red}{CTYPE, CNAME, CDESC，CNO}$</p><p>很显然，这就是《什么索引是好的索引》中介绍的所谓的好的索引，知识都是相辅相成的。</p><p>使用了该更改后的索引，其LRT会变成多少？</p><p>LRT = 10ms + 1000 <em> 0.01ms + 1000 </em> 0.1ms = 120ms</p><p>速度提升了100倍！</p><hr><hr><p><strong><em> 好了，本文重点介绍了如何在实际生产环境中和设计过程中发现问题及优化索引，只要掌握原则，了解思路，剩下的就是运用了。</em></strong></p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> 索引 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>B树</title>
+      <link href="/2019/05/14/btree/"/>
+      <url>/2019/05/14/btree/</url>
+      
+        <content type="html"><![CDATA[<h3 id="目录："><a href="#目录：" class="headerlink" title="目录："></a>目录：</h3><ol><li><strong>什么是B树</strong></li><li><strong>B树的最小度数</strong></li><li><strong>B树的高度</strong></li><li><strong>什么情况下使用B树</strong></li><li>B树的插入</li></ol><p><strong> 正文：</strong></p><h2 id="1-什么是B树"><a href="#1-什么是B树" class="headerlink" title="1. 什么是B树"></a>1. 什么是B树</h2><pre><code>    1&gt;  是一种平衡搜索树    2&gt;  为磁盘或者其他直接存储的辅助存储设备设计    3&gt;  类似于红黑树，但是更降低磁盘操作I/O    4&gt;  节点分为内部节点（非叶子节点）和叶子节点    5&gt;  节点可以不止一个关键字    6&gt;  假设节点中的关键字个数为n,则该节点的孩子数一定是n+1    7&gt;  每个节点内部的排序一定是从左到右增大（如下图30 &lt; 80,50 &lt; 60)    8&gt;  假设节点x的关键字的个数为n,从左到右为x1,x2,...xn(如下图n=2,x1=50,x2=60)        由第6&gt;条得知其孩子数为n+1,从左到右为c1,c2,...cn+1(如下图c1=(35,40),c2=55,c3=70)        那么排序规则一定是c1&lt;x1&lt;c2&lt;x2&lt;..xn&lt;cn+1    9&gt;  每个叶子节点一定具有相同的深度，即树的高度是一致的。    10&gt; 每个节点关键字的个数有上限和下限，取决于树设定的最小度数t。            t -1 &lt;= n &lt;= 2t -1        根节点不受最小t -1的限制，如果树非空，根节点至少有1个关键字</code></pre><p> 典型的B树如下图<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999ef2d9482d3e?w=1134&amp;h=468&amp;f=png&amp;s=332315" alt="在这里插入图片描述"></p><h2 id="2-B树的最小度数"><a href="#2-B树的最小度数" class="headerlink" title="2. B树的最小度数"></a>2. B树的最小度数</h2><pre><code>     1&gt; 每个节点关键字的个数有上限和下限，取决于树设定的最小度数t。            t -1 &lt;= n &lt;= 2t -1       根节点不受最小t -1的限制，如果树非空，根节点至少有1个关键字    2&gt; 当一个节点恰好有2t-1个关键字，则该节点是满的（在插入B树时用到该概念）    3&gt; 当一个节点恰好是t-1个关键字时，则该节点是最小状态（在删除B树时用到该概念）</code></pre><h2 id="3-B树的高度"><a href="#3-B树的高度" class="headerlink" title="3. B树的高度"></a>3. B树的高度</h2><p> 为什么我们要关心B树的高度，因为B树主要是为磁盘访问设计的，B树的高度与磁盘存取次数成正比。</p><p>因为根节点最小关键字数目为1，其他节点最少为t-1，则树上的关键字个数n满足:</p><p><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999ef2d954b530?w=350&amp;h=42&amp;f=gif&amp;s=1357" alt="在这里插入图片描述"><br> 则树的高度满足：</p><p><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999ef2d9ed6faa?w=100&amp;h=42&amp;f=gif&amp;s=619" alt="在这里插入图片描述"><br> 所以随着t的增大，h减少，磁盘的存取次数也减少。</p><h2 id="4-什么情况下使用B树"><a href="#4-什么情况下使用B树" class="headerlink" title="4. 什么情况下使用B树"></a>4. 什么情况下使用B树</h2><pre><code> 如第一节所述，B树是为磁盘或者其他直接存储的辅助存储设备设计的。 典型的B树使用场景就是数据库。</code></pre><p>从树的高度公式可以看出，t越大，即节点内关键字越多，树的高度越小，磁盘存取次数越少。</p><p>树的节点关键字越多，那么多少合适呢？</p><p>其实，节点中关键字，就是磁盘一次要读取的大小，以磁盘的页为单位，磁盘一般一次会加载1个或多个页，1页的大小一般在4k~8k</p><p>所以关键字少了，一次磁盘读取，会造成浪费；关键字多了，一次磁盘读取就读不下。</p><p>所以设置合理的t值很重要。并且在动态插入删除中要保证B树也符合B树的上述特征，来满足应用场景需要。</p><p>关于B树的插入和删除，下章再说…</p><h2 id="5-B树的插入"><a href="#5-B树的插入" class="headerlink" title="5. B树的插入"></a>5. B树的插入</h2><p> B树要保持它的平衡及最小度数（t-1=&lt;n&lt;=2t-1,  t&lt;=child&lt;=2t）特性，则需要在插入以后也是一个满足此特性的B树。</p><p>那么如果是你，如何保证在插入关键字后，新的B树也能满足其特性呢？</p><p><strong><em>一般的思路是：</em></strong></p><ol><li>根据B树的排序特性，找到插入的节点</li><li>如果插入的节点是不满的（n&lt;2t-1）,直接插入</li><li>如果插入的节点是满的（n=2t-1），则不能直接插入，因为插入以后，就不符合B树的特征了，我们要一直维护B树的特征，               n&lt;=2t-1,所以需要将节点进行拆分；</li><li>节点拆分后，如果只是单纯的拆分，一个child的裂变成两个，显然这么简单的裂变是不行的，因为child+1了，但是父节点的关键字个数n没变，所以不符合child = n+1，子节点多裂变了一个，但是父节点没变；</li><li>所以节点拆分后，需要将中间的数据，提到父节点中；</li><li>但是如果父节点是满的，子节点提到父节点中又不满足B树的特性了，父节点也要裂变，提一个到父父节点中；</li><li>如果父父节点是满的，则又周而复始….</li></ol><p>所以这将是个从上到下查找，又从下到上裂变的过程。</p><p><strong><em>虽然这也可以实现，但是有没有优化的方法？</em></strong></p><ol><li>观察一下这个过程，本身定位到插入节点时，已经有一次至上到下的过程了；</li><li>如果在至上而下的过程中，每发现满的节点，就进行拆分呢，是不是就可以做到一次向下查找，就能满足后续的插入裂变。</li></ol><p>是的，这就是B树的插入过程！</p><ol><li>至上而下查找</li><li>每发现满节点，就进行裂变</li><li>找到插入位置，插入，如果需要裂变，就裂变，因为父节点不可能是满的，再刚刚遍历到父节点的时候，已经提前腾出空间了！</li></ol><p>就是这么简单！</p><p><strong>让我们来看个例子：</strong></p><p>有如下字母：<strong>F, S, Q, K, C, L, H, T, V</strong></p><ol><li>假设现在有个空树</li><li>假设t = 2, 即最小度数为2；</li><li>请画出B树的插入过程（只画出关键过程）</li></ol><p>解答：</p><ol><li>t = 2,意味着我们节点的关键字个数在1~3之间，一单关键字个数超过3，则要裂变</li><li>在依次插入F,S,Q时，很简单，因为根节点&lt;=3<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e69fb3ab1?w=136&amp;h=150&amp;f=png&amp;s=8311" alt="在这里插入图片描述"></li><li>当插入K时，自上而下的过程中，发现父节点是满的，必然要先拆分父节点<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e6a7eec8f?w=265&amp;h=91&amp;f=png&amp;s=7678" alt="在这里插入图片描述"></li><li>此时父节点已经被成功拆分成不满的节点，并且子节点个数和排序也符合B树要求</li><li>插入K，比如是从Q向左查找，插入到F之后。<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e6ad22fe2?w=305&amp;h=127&amp;f=png&amp;s=12693" alt="在这里插入图片描述"></li><li>接着要插入C，直接插入的到F之前就行，因为在至顶向下的过程中，没有发现满节点<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e6b067113?w=285&amp;h=130&amp;f=png&amp;s=13496" alt="在这里插入图片描述"></li><li>好了，下面到L了，当至顶向下的过程中，L是在Q左侧查找，发现了CFK节点是满的，必然进行拆分；<br>将中间节点F提上来，父节点个数+1，子节点个数+1, 仍然符合B树特征<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e6b8888ad?w=399&amp;h=138&amp;f=png&amp;s=17221" alt="在这里插入图片描述"></li><li>拆分之后，插入L<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e6ba2da0e?w=338&amp;h=122&amp;f=png&amp;s=14030" alt="在这里插入图片描述"><br>后续的插入，就不用多讲了，重复以上过程。</li></ol><h3 id="写在最后，学好B树还有助于我们理解数据库设计"><a href="#写在最后，学好B树还有助于我们理解数据库设计" class="headerlink" title="写在最后，学好B树还有助于我们理解数据库设计"></a>写在最后，学好B树还有助于我们理解数据库设计</h3><p><br></p><hr>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> 算法 索引 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>什么索引算是好的索引</title>
+      <link href="/2019/05/14/goodindexing/"/>
+      <url>/2019/05/14/goodindexing/</url>
+      
+        <content type="html"><![CDATA[<h2 id="好的索引，你值得拥有"><a href="#好的索引，你值得拥有" class="headerlink" title="好的索引，你值得拥有"></a>好的索引，你值得拥有</h2><p>其实好的索引的原则，很简单，只要满足三个条件:</p><ol><li>能够覆盖查询语句</li><li>能够避免排序</li><li>窄索引片 </li></ol><h3 id="1-能够覆盖查询语句"><a href="#1-能够覆盖查询语句" class="headerlink" title="1. 能够覆盖查询语句"></a><strong>1. 能够覆盖查询语句</strong></h3><p>举个例子：<br>select a,c,d from table1 where b = 1 and e = 2 and g &gt; 7;</p><p>能够覆盖查询语句，即意味着索引要含：a,b,c,d,e,g</p><p>为什么呢，因为如此一来，所有的查询结果，都在索引里能找到，不需要到表数据里再查找。</p><h3 id="2-能够避免排序"><a href="#2-能够避免排序" class="headerlink" title="2. 能够避免排序"></a><strong>2. 能够避免排序</strong></h3><p>举个例子：<br>select a,c,d from table1 where b = 1 and e = 2 and g &gt; 7 order by g desc;</p><p>如果按照a,b,c,d,e,g的顺序建立索引，那么意味着该索引是按照a来排序的，所以在索引过滤完，还需要根据g进行二次排序</p><p>那如何才能做到根据g来排序？</p><p>很简单：索引的顺序调整一下</p><p>b, e, g, a, c, d </p><p>假设索引的实际内容如下：<br><br><br>1, 2, 8, x, x, x<br><br><br>1, 2, 9, x, x, x<br><br><br>1, 2,10, x, x, x</p><p>因为b=1,e=2是固定的，所以只要把g提到前面，那么排序必然是按照g来的</p><p>如此一来，根据a, b, g过滤好的索引，天然就是排序好的结果</p><h3 id="3-窄索引片"><a href="#3-窄索引片" class="headerlink" title="3.窄索引片"></a><strong>3.窄索引片</strong></h3><p>什么是索引片，以及什么样的索引片是窄索引片，已经在《索引》这篇中介绍过了</p><p>所谓的索引片，就是优化器根据查询语句，在索引中，实际使用的用于检索的索引</p><p>举个例子：select a,c,d from table1 where b = 1 and e = 2 and g &gt; 7 and c &lt; 5 order by g desc;</p><p>根据优化器的逻辑：<br><br><br>如果索引是(a,b,c,d,e,g)<br>那么索引片是0，即没有索引片，因为a，在查询语句中根本就没有查询条件</p><p>那么好的索引是什么样的：</p><p>b, e, g, a, c, d</p><p>让我们来看看这个索引，<br><br><br>当扫描b时，b=1, 加入到索引片中(b)；<br><br><br>当扫描e时，e=2, 加入到索引片中(b,e);<br><br><br>当扫描g时，g &gt;7,加入到索引片中(b,e,g)，但是因为g是范围查询，索引g之后的条件，都不能纳入到索引片中</p><p>所以最终索引片是(b, e, g)<br>即用b, e, g来在索引的B树中找到索引们</p><p>那么c &lt; 5，如果c在索引中，c &lt; 5 就是过滤列，在索引过滤的基础上，再进行对索引过滤。</p><p>所以，对于select a,c,d from table1 where b = 1 and e = 2 and g &gt; 7 order by g desc;</p><h3 id="最佳的索引是什么："><a href="#最佳的索引是什么：" class="headerlink" title="最佳的索引是什么："></a>最佳的索引是什么：</h3><p>b, e, g, a, c, d</p><p>满足了1， 2，3条，优化器只要对索引进行查找即可，就能过滤出所要的数据！</p><h3 id="那么索引设计就是这么简单吗？"><a href="#那么索引设计就是这么简单吗？" class="headerlink" title="那么索引设计就是这么简单吗？"></a>那么索引设计就是这么简单吗？</h3><p>当然不是，以上只是理想情况下，还有比如:<br><br><br>2,3条不能兼得；<br><br><br>现有数据库索引已经设计好，投入使用，但是效率低，是不是直接添加一个最佳索引就行？<br><br><br>添加索引的成本？<br><br><br>跨表查询的情况？等等</p><p>索引是门艺术，我们慢慢来~</p><p><br></p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> 索引 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>索引</title>
+      <link href="/2019/05/14/indexing/"/>
+      <url>/2019/05/14/indexing/</url>
+      
+        <content type="html"><![CDATA[<h3 id="目录："><a href="#目录：" class="headerlink" title="目录："></a>目录：</h3><ol><li>什么是索引</li><li>索引的存储</li><li>聚簇索引和非聚餐索引</li><li>索引片<br><br></li></ol><h2 id="1-什么是索引"><a href="#1-什么是索引" class="headerlink" title="1. 什么是索引"></a>1. 什么是索引</h2><p>&nbsp;<br>&nbsp;<br>索引对于数据库，相当于目录对应于图书，我们能通过索引快速的对数据库的内容进行定位。</p><p>&nbsp;<br>&nbsp;<br>当没有索引，或者没有一个合适的索引，在大量的表数据中查询，将是一场灾难；<br><br></p><h2 id="2-索引的存储"><a href="#2-索引的存储" class="headerlink" title="2. 索引的存储"></a>2. 索引的存储</h2><p>&nbsp;<br>&nbsp;<br>索引实际使用时其还是占用存储空间的；</p><p>&nbsp;<br>&nbsp;<br>就像目录也是占用了图书的几页纸一样。</p><p>&nbsp;<br>&nbsp;<br>那么索引，是如何存储的呢？</p><p>&nbsp;<br>&nbsp;<br>B树索引能高效的提高磁盘IO，特别是对与数据库这种数据量比较多的情况，肯定是希望比较少的磁盘读取及每次读取得到比较多的数据；B树就很好的满足了这种特性。</p><h2 id="3-聚簇索引和非聚簇索引"><a href="#3-聚簇索引和非聚簇索引" class="headerlink" title="3.聚簇索引和非聚簇索引"></a>3.聚簇索引和非聚簇索引</h2><p>&nbsp;<br>&nbsp;<br>聚簇索引是比较容易混淆的概念，在不同的数据库中，其代表的意义是不一样的。<br><br><br>&nbsp;<br>&nbsp;<br>一般我们认为聚簇索引有如下特性：<br><br> <br><br>&nbsp;<br>&nbsp;<br>1&gt; 聚簇索引确定表中数据的物理顺序<br><br><br>&nbsp;<br>&nbsp;<br>2&gt; 每张表只能建一个聚簇索引<br><br><br>&nbsp;<br>&nbsp;<br>3&gt; 当聚簇索引缺失时，默认主键为聚簇索引<br><br><br>&nbsp;<br>&nbsp;<br>4&gt; 非聚簇索引叶子节点指向聚簇索引</p><p>&nbsp;<br>&nbsp;<br>由此看来，聚簇索引是非常珍贵的，当查询的条件正好是聚簇索引能覆盖的范围时，是非常快速的；因为通过索引就能找到数据，不用再到磁盘上进行多次查找。</p><p><br><br>&nbsp;<br>&nbsp;<br>非聚簇索引，则是相反，其不限制个数，不能直接定位到数据，其叶子节点是指向数据的指针，且并不一定能唯一确定一条数据，所以指针可以是多个。</p><h2 id="4-索引片"><a href="#4-索引片" class="headerlink" title="4.索引片"></a>4.索引片</h2><p>&nbsp;<br>&nbsp;<br>查询时，理想的情况是，查询条件已经覆盖在索引中了，查询是基于索引的查询，那此时查询速度会比较快；但是实际情况却很复杂，这就需要我们知道优化器是如何根据查询条件及索引来进行查询的。流程如下：</p><pre><code>从头到尾依次检查索引列1.在where子句中，该列是否至少拥有一个足够简单的查询与之对应？  如果有，那么这个列就是匹配列；  如果没有，那么这个列及其后面的索引列都是非匹配列2.如果该索引对应的查询条件是范围，那么剩余的索引都是非匹配列3.对于最后一个匹配列之后的索引列，如果拥有一个足够简单的查询条件与其对应，那么该列就是过滤列</code></pre><p><img src="https://user-gold-cdn.xitu.io/2019/3/26/169b782c22b087e0?w=722&amp;h=569&amp;f=png&amp;s=28369" alt="索引片流程图"></p><p>&nbsp;<br>&nbsp;<br>比如索引（A,B,C,D），对应查询条件where A = 1 and B &lt; 3 and C = 2<br><br><br>&nbsp;<br>&nbsp;<br>按照流程图，首先看A，A的查询语句是A = 1,足够简单，且不是范围条件，所以A是匹配索引<br><br><br>&nbsp;<br>&nbsp;<br>再看B，B是条件查询，B&lt;3,所以B是匹配索引，但是B后面的索引都是非匹配索引；<br><br><br>&nbsp;<br>&nbsp;<br>再看查询条件，还有C=2，因为C虽然是索引，但是因为B是范围查询，所以其后的所有索引都是非匹配索引，所以C是非匹配索引，但是因为C也有简单的查询条件，所以C是过滤列<br><br><br>&nbsp;<br>&nbsp;<br>综上所述，对于索引（A,B,C,D），其在查询条件where A = 1 and B &lt; 3 and C = 2中，索引片是（A,B）过滤列是C<br><br><br>&nbsp;<br>&nbsp;<br>那这个结果意味着什么？ </p><p><br><br>&nbsp;<br>&nbsp;<br>也就是对于索引（A,B,C,D），其本身索引存储时，是<br>A, B, C, D</p><p>&nbsp;<br>&nbsp;<br>比如索引有100w条，那么根据上述流程图，A,B是索引片</p><p>&nbsp;<br>&nbsp;<br>那么基于这100W条，通过A,B组合查找出假设10w条，再通过C，在这10W条中进行过滤，最后剩余1w条</p><p>&nbsp;<br>&nbsp;<br>索引片越窄，即参与过滤的索引越多，那么效率就会越高，因为索引片本身的查找是基于索引的，即B树查找；</p><p>&nbsp;<br>&nbsp;<br>那是不是索引片窄了就行了呢？</p><p>其实索引涉及的内容还有很多，比如如果涉及到排序、联合查询、索引数目太多，什么才是好的索引等等</p><p><br> </p><p>在此建议大家看《<strong>数据库索引设计与优化</strong>》（Tapio Lahdenmaki/Michael Leach）</p><p>通俗易懂的解释了索引的工作原理，以及如何设计索引</p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> 索引 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>什么是动态规划</title>
       <link href="/2019/05/13/dp/"/>
       <url>/2019/05/13/dp/</url>

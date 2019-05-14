@@ -4,15 +4,14 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="什么是动态规划, Tech Music Life psychology">
-    <meta name="description" content="目录
-动态规划解决了什么
-什么是动态规划
-典型的动态规划
+    <meta name="keywords" content="什么索引算是好的索引, Tech Music Life psychology">
+    <meta name="description" content="好的索引，你值得拥有其实好的索引的原则，很简单，只要满足三个条件:
 
-1. 动态规划解决了什么
-我们知道递归思想就是将大问题拆分成小问题进行攻破;比如钢条切割问题：给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大
-我们很容易想到通过">
+能够覆盖查询语句
+能够避免排序
+窄索引片 
+
+1. 能够覆盖查询语句举个例子：select a,c,d from table1 where b = 1 and e = 2">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -20,7 +19,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>什么是动态规划 | alictopo&#39;s blog</title>
+    <title>什么索引算是好的索引 | alictopo&#39;s blog</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -264,13 +263,13 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/14.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/21.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        什么是动态规划
+                        什么索引算是好的索引
                     </div>
                 </div>
             </div>
@@ -381,8 +380,8 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/算法/" target="_blank">
-                                <span class="chip bg-color">算法</span>
+                            <a href="/tags/索引/" target="_blank">
+                                <span class="chip bg-color">索引</span>
                             </a>
                         
                     </div>
@@ -396,21 +395,21 @@
             <div class="post-info">
                 <div class="post-date info-break-policy">
                     <i class="fa fa-calendar-minus-o fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2019-05-13
+                    2019-05-14
                 </div>
 
                 
                     
                     <div class="info-break-policy">
                         <i class="fa fa-file-word-o fa-fw"></i>文章字数:&nbsp;&nbsp;
-                        1.3k
+                        819
                     </div>
                     
 
                     
                     <div class="info-break-policy">
                         <i class="fa fa-clock-o fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                        4 分
+                        3 分
                     </div>
                     
                 
@@ -426,62 +425,38 @@
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h3 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h3><ol>
-<li>动态规划解决了什么</li>
-<li>什么是动态规划</li>
-<li>典型的动态规划</li>
+                <h2 id="好的索引，你值得拥有"><a href="#好的索引，你值得拥有" class="headerlink" title="好的索引，你值得拥有"></a>好的索引，你值得拥有</h2><p>其实好的索引的原则，很简单，只要满足三个条件:</p>
+<ol>
+<li>能够覆盖查询语句</li>
+<li>能够避免排序</li>
+<li>窄索引片 </li>
 </ol>
-<h2 id="1-动态规划解决了什么"><a href="#1-动态规划解决了什么" class="headerlink" title="1. 动态规划解决了什么"></a>1. 动态规划解决了什么</h2><hr>
-<p>我们知道<code>递归</code>思想就是将大问题拆分成小问题进行攻破;<br>比如钢条切割问题：<br>给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大<br><img src="https://user-gold-cdn.xitu.io/2019/3/31/169d43d1f20919a5?w=878&amp;h=99&amp;f=png&amp;s=35326" alt="钢条切割"></p>
-<p>我们很容易想到通过递归进行求解：<br>假设price(x)代表长度x的钢材的最大收益,我们很容易将问题进行递归分解：</p>
-<pre><code>    price(n) = max(pi, price(1)+price(n-1), price(2)+price(n-2),....,price(n-1)+price(1) );
-</code></pre><p>比如，我们求解一根长度为4的钢材的切割方式：<br>就是求取各种组合的最大利益</p>
-<pre><code>    price(4) = max(p4, price(1) + price(3), price(2) + price(2), price(3) + price(1));
-</code></pre><p>那么接下来就是求解，price(3)、price(2)、price(1)的问题了；</p>
-<p>这种自顶向下分解递归的方式肯定是可以解决这个钢条切割的问题的，但是有没有缺陷？</p>
-<p>有的，还不小，就是效率问题。<br>随着x的增大，递归的效率会越来越低，运行速度会很慢，因为什么？</p>
-<pre><code>因为它在反复求解相同的问题
-在price(3)时，其已经计算过3的最优解了，且2、1的肯定也有了；
-作为人类，我们自然而然就会将这个结果记住，并用于下次计算；
-但是递归不会，在price(4)的时候，其仍然还会计算price(3),price(2),price(1），
-不管是不是上次递归已经计算过了。
-</code></pre><p>那么解决这个问题的很简单的办法是什么？</p>
-<p>没错，就是<strong>记忆</strong><br>将先前解决的子问题，进行存储，以减少重复计算！<br>这就是<strong>带备忘的递归</strong></p>
-<p>好了，貌似我们讨论到现在都是说的递归问题，其实呢，到目前为止，我们已经讲完了动态规划的本质：</p>
-<p><strong>以空间换时间，解决最优化问题}</strong></p>
-<h2 id="2-什么是动态规划"><a href="#2-什么是动态规划" class="headerlink" title="2. 什么是动态规划"></a>2. 什么是动态规划</h2><hr>
-<pre><code>1.动态规划是通过组合子问题的解来解决原问题
-2.动态规划应用于子问题重叠的情况，即不同的子问题具有公共的子子问题
-3.动态规划算法对每个子子问题只求解一次
-4.动态规划通常用来求解最优化问题
-</code></pre><p>动态规划算法：</p>
-<pre><code>1.刻画一个最优解的结构特征
-2.递归的定义最优解的值
-3.计算最优解的值，通常自底向上
-4.利用计算出的信息构造一个最优解
-</code></pre><p>好了，让我们用动态规划解一下钢条切割问题：</p>
-<p><strong>1.刻画一个最优解的结构特征</strong><br>递归法中已经刻画的很清楚了</p>
-<p><strong>2.递归的定义最优解的值</strong><br>公式也在上面写过了</p>
-<p><strong>3.计算最优解的值，通常自底向上</strong><br>通过带备忘的自顶向下递归法，我们成功的比较高效的解决了钢铁切割的问题，这也是动态规划的一种方式,有没有其他方式？<br>有的，对应于自顶而下，我们采用自底而上的方式，将子问题按照从小到大的顺序进行求解，当然还是得有备忘机制。</p>
-<p>大部分情况下，自顶而下和自底而上的效率是近似的；但是呢，在某些特殊情况，自顶向下方法并未真正的递归考察所有可能的子问题；而且自底向上也没有频繁的递归函数的开销；</p>
-<p>所以，一般动态规划都是采用自底向上的方法，将复杂的问题，变成了简单的多项式相加。</p>
-<p><strong>4.利用计算出的信息构造一个最优解</strong><br>这条就更简单了，既然你算法都写出来了，在算法的途中，加上最优解的存储及输出就可以了，</p>
-<pre><code>比如动态规划钢铁切割问题，在算法最初，我们关心的是price(n)，计算出最佳的收益；
-最后我们只要在编写出的算法中，加上输出钢铁的分割就可以了。
-</code></pre><h2 id="3-典型的动态规划"><a href="#3-典型的动态规划" class="headerlink" title="3. 典型的动态规划"></a>3. 典型的动态规划</h2><hr>
-<p>钢铁切割问题本身就是个典型的动态规划，除了这个例子，还有：</p>
-<pre><code>最长公共子序列
-最优二叉搜索树
-矩阵链乘法
-....
-</code></pre><p>不管是什么问题，本质上我们都是通过层层分解子问题，并进行组合；</p>
-<p>如果这个问题，满足上述特性，那么动态规划就是这些问题可能的解决方法之一。</p>
-<p>某些问题是否适用于动态规划算法，你可以从如下角度：</p>
-<pre><code>1.是否具有最优子结构性质
-    如果一个问题的最优解，包含其子问题的最优解
-2.具有重叠子问题性质
-    问题的递归算法会反复求解相同的子问题
-</code></pre><p>算法的精髓在于，其没有最好，只有最合适</p>
+<h3 id="1-能够覆盖查询语句"><a href="#1-能够覆盖查询语句" class="headerlink" title="1. 能够覆盖查询语句"></a><strong>1. 能够覆盖查询语句</strong></h3><p>举个例子：<br>select a,c,d from table1 where b = 1 and e = 2 and g &gt; 7;</p>
+<p>能够覆盖查询语句，即意味着索引要含：a,b,c,d,e,g</p>
+<p>为什么呢，因为如此一来，所有的查询结果，都在索引里能找到，不需要到表数据里再查找。</p>
+<h3 id="2-能够避免排序"><a href="#2-能够避免排序" class="headerlink" title="2. 能够避免排序"></a><strong>2. 能够避免排序</strong></h3><p>举个例子：<br>select a,c,d from table1 where b = 1 and e = 2 and g &gt; 7 order by g desc;</p>
+<p>如果按照a,b,c,d,e,g的顺序建立索引，那么意味着该索引是按照a来排序的，所以在索引过滤完，还需要根据g进行二次排序</p>
+<p>那如何才能做到根据g来排序？</p>
+<p>很简单：索引的顺序调整一下</p>
+<p>b, e, g, a, c, d </p>
+<p>假设索引的实际内容如下：<br><br><br>1, 2, 8, x, x, x<br><br><br>1, 2, 9, x, x, x<br><br><br>1, 2,10, x, x, x</p>
+<p>因为b=1,e=2是固定的，所以只要把g提到前面，那么排序必然是按照g来的</p>
+<p>如此一来，根据a, b, g过滤好的索引，天然就是排序好的结果</p>
+<h3 id="3-窄索引片"><a href="#3-窄索引片" class="headerlink" title="3.窄索引片"></a><strong>3.窄索引片</strong></h3><p>什么是索引片，以及什么样的索引片是窄索引片，已经在《索引》这篇中介绍过了</p>
+<p>所谓的索引片，就是优化器根据查询语句，在索引中，实际使用的用于检索的索引</p>
+<p>举个例子：select a,c,d from table1 where b = 1 and e = 2 and g &gt; 7 and c &lt; 5 order by g desc;</p>
+<p>根据优化器的逻辑：<br><br><br>如果索引是(a,b,c,d,e,g)<br>那么索引片是0，即没有索引片，因为a，在查询语句中根本就没有查询条件</p>
+<p>那么好的索引是什么样的：</p>
+<p>b, e, g, a, c, d</p>
+<p>让我们来看看这个索引，<br><br><br>当扫描b时，b=1, 加入到索引片中(b)；<br><br><br>当扫描e时，e=2, 加入到索引片中(b,e);<br><br><br>当扫描g时，g &gt;7,加入到索引片中(b,e,g)，但是因为g是范围查询，索引g之后的条件，都不能纳入到索引片中</p>
+<p>所以最终索引片是(b, e, g)<br>即用b, e, g来在索引的B树中找到索引们</p>
+<p>那么c &lt; 5，如果c在索引中，c &lt; 5 就是过滤列，在索引过滤的基础上，再进行对索引过滤。</p>
+<p>所以，对于select a,c,d from table1 where b = 1 and e = 2 and g &gt; 7 order by g desc;</p>
+<h3 id="最佳的索引是什么："><a href="#最佳的索引是什么：" class="headerlink" title="最佳的索引是什么："></a>最佳的索引是什么：</h3><p>b, e, g, a, c, d</p>
+<p>满足了1， 2，3条，优化器只要对索引进行查找即可，就能过滤出所要的数据！</p>
+<h3 id="那么索引设计就是这么简单吗？"><a href="#那么索引设计就是这么简单吗？" class="headerlink" title="那么索引设计就是这么简单吗？"></a>那么索引设计就是这么简单吗？</h3><p>当然不是，以上只是理想情况下，还有比如:<br><br><br>2,3条不能兼得；<br><br><br>现有数据库索引已经设计好，投入使用，但是效率低，是不是直接添加一个最佳索引就行？<br><br><br>添加索引的成本？<br><br><br>跨表查询的情况？等等</p>
+<p>索引是门艺术，我们慢慢来~</p>
+<p><br></p>
 
             </div>
             <hr>
@@ -637,9 +612,9 @@
             </div>
             <br>
             <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">
-                    《什么是动态规划》
+                    《什么索引算是好的索引》
                 </span> 由
-            <a xmlns:cc="http://creativecommons.org/ns#" href="/2019/05/13/dp/" property="cc:attributionName" rel="cc:attributionURL">
+            <a xmlns:cc="http://creativecommons.org/ns#" href="/2019/05/14/goodindexing/" property="cc:attributionName" rel="cc:attributionURL">
                 alictopo
             </a> 采用
             <a rel="license" href="https://creativecommons.org/licenses/by/4.0/deed.zh">
@@ -682,6 +657,61 @@
             <div class="article-badge left-badge text-color">
                 <i class="fa fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
+                <a href="/2019/05/14/btree/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/7.jpg" class="responsive-img" alt="B树">
+                        
+                        <span class="card-title">B树</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            目录：
+什么是B树
+B树的最小度数
+B树的高度
+什么情况下使用B树
+B树的插入
+
+ 正文：
+1. 什么是B树    1&gt;  是一种平衡搜索树
+    2&gt;  为磁盘或者其他直接存储的辅助存储设备设计
+    3&gt;  类似于
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-05-14
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-user fa-fw"></i>
+                            alictopo
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/算法-索引/" target="_blank">
+                        <span class="chip bg-color">算法 索引</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6 overflow-policy" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fa fa-chevron-right"></i>
+            </div>
+            <div class="card">
                 <a href="/2019/05/14/indexing/">
                     <div class="card-image">
                         
@@ -705,9 +735,9 @@
                         
                     </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-05-14
-                        </span>
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-05-14
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-user fa-fw"></i>
@@ -721,59 +751,6 @@
                     
                     <a href="/tags/索引/" target="_blank">
                         <span class="chip bg-color">索引</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6 overflow-policy" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">
-                本篇&nbsp;<i class="fa fa-dot-circle-o"></i>
-            </div>
-            <div class="card">
-                <a href="/2019/05/13/dp/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/14.jpg" class="responsive-img" alt="什么是动态规划">
-                        
-                        <span class="card-title">什么是动态规划</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            目录
-动态规划解决了什么
-什么是动态规划
-典型的动态规划
-
-1. 动态规划解决了什么
-我们知道递归思想就是将大问题拆分成小问题进行攻破;比如钢条切割问题：给定一段长度为n的钢条和如下的价格表，求切割钢条方案，使得收益最大
-我们很容易想到通过
-                        
-                    </div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-05-13
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fa fa-user fa-fw"></i>
-                            alictopo
-                            
-                        </span>
-                    </div>
-                </div>
-
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/算法/" target="_blank">
-                        <span class="chip bg-color">算法</span>
                     </a>
                     
                 </div>
