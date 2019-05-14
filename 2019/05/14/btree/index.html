@@ -458,7 +458,7 @@ B树的插入
 
     2&gt; 当一个节点恰好有2t-1个关键字，则该节点是满的（在插入B树时用到该概念）
     3&gt; 当一个节点恰好是t-1个关键字时，则该节点是最小状态（在删除B树时用到该概念）
-</code></pre><h2 id="3-B树的高度"><a href="#3-B树的高度" class="headerlink" title="3. B树的高度"></a>3. B树的高度</h2><p> 为什么我们要关心B树的高度，因为B树主要是为磁盘访问设计的，B树的高度与磁盘存取次数成正比。</p>
+</code></pre><h2 id="3-B树的高度"><a href="#3-B树的高度" class="headerlink" title="3. B树的高度"></a>3. B树的高度</h2><p>为什么我们要关心B树的高度，因为B树主要是为磁盘访问设计的，B树的高度与磁盘存取次数成正比。</p>
 <p>因为根节点最小关键字数目为1，其他节点最少为t-1，则树上的关键字个数n满足:</p>
 <p><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999ef2d954b530?w=350&amp;h=42&amp;f=gif&amp;s=1357" alt><br> 则树的高度满足：</p>
 <p><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999ef2d9ed6faa?w=100&amp;h=42&amp;f=gif&amp;s=619" alt><br> 所以随着t的增大，h减少，磁盘的存取次数也减少。</p>
