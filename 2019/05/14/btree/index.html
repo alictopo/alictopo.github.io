@@ -451,7 +451,7 @@ B树的插入
     10&gt; 每个节点关键字的个数有上限和下限，取决于树设定的最小度数t。
             t -1 &lt;= n &lt;= 2t -1
         根节点不受最小t -1的限制，如果树非空，根节点至少有1个关键字
-</code></pre><p> 典型的B树如下图<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999ef2d9482d3e?w=1134&amp;h=468&amp;f=png&amp;s=332315" alt="在这里插入图片描述"></p>
+</code></pre><p> 典型的B树如下图<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999ef2d9482d3e?w=1134&amp;h=468&amp;f=png&amp;s=332315" alt="B树"></p>
 <h2 id="2-B树的最小度数"><a href="#2-B树的最小度数" class="headerlink" title="2. B树的最小度数"></a>2. B树的最小度数</h2><pre><code>     1&gt; 每个节点关键字的个数有上限和下限，取决于树设定的最小度数t。
             t -1 &lt;= n &lt;= 2t -1
        根节点不受最小t -1的限制，如果树非空，根节点至少有1个关键字
@@ -460,8 +460,8 @@ B树的插入
     3&gt; 当一个节点恰好是t-1个关键字时，则该节点是最小状态（在删除B树时用到该概念）
 </code></pre><h2 id="3-B树的高度"><a href="#3-B树的高度" class="headerlink" title="3. B树的高度"></a>3. B树的高度</h2><p> 为什么我们要关心B树的高度，因为B树主要是为磁盘访问设计的，B树的高度与磁盘存取次数成正比。</p>
 <p>因为根节点最小关键字数目为1，其他节点最少为t-1，则树上的关键字个数n满足:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999ef2d954b530?w=350&amp;h=42&amp;f=gif&amp;s=1357" alt="在这里插入图片描述"><br> 则树的高度满足：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999ef2d9ed6faa?w=100&amp;h=42&amp;f=gif&amp;s=619" alt="在这里插入图片描述"><br> 所以随着t的增大，h减少，磁盘的存取次数也减少。</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999ef2d954b530?w=350&amp;h=42&amp;f=gif&amp;s=1357" alt="关键字"><br> 则树的高度满足：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999ef2d9ed6faa?w=100&amp;h=42&amp;f=gif&amp;s=619" alt="树的高度"><br> 所以随着t的增大，h减少，磁盘的存取次数也减少。</p>
 <h2 id="4-什么情况下使用B树"><a href="#4-什么情况下使用B树" class="headerlink" title="4. 什么情况下使用B树"></a>4. 什么情况下使用B树</h2><pre><code> 如第一节所述，B树是为磁盘或者其他直接存储的辅助存储设备设计的。
  典型的B树使用场景就是数据库。
 </code></pre><p>从树的高度公式可以看出，t越大，即节点内关键字越多，树的高度越小，磁盘存取次数越少。</p>
@@ -505,13 +505,13 @@ B树的插入
 <p>解答：</p>
 <ol>
 <li>t = 2,意味着我们节点的关键字个数在1~3之间，一单关键字个数超过3，则要裂变</li>
-<li>在依次插入F,S,Q时，很简单，因为根节点&lt;=3<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e69fb3ab1?w=136&amp;h=150&amp;f=png&amp;s=8311" alt="在这里插入图片描述"></li>
-<li>当插入K时，自上而下的过程中，发现父节点是满的，必然要先拆分父节点<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e6a7eec8f?w=265&amp;h=91&amp;f=png&amp;s=7678" alt="在这里插入图片描述"></li>
+<li>在依次插入F,S,Q时，很简单，因为根节点&lt;=3<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e69fb3ab1?w=136&amp;h=150&amp;f=png&amp;s=8311" alt></li>
+<li>当插入K时，自上而下的过程中，发现父节点是满的，必然要先拆分父节点<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e6a7eec8f?w=265&amp;h=91&amp;f=png&amp;s=7678" alt></li>
 <li>此时父节点已经被成功拆分成不满的节点，并且子节点个数和排序也符合B树要求</li>
-<li>插入K，比如是从Q向左查找，插入到F之后。<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e6ad22fe2?w=305&amp;h=127&amp;f=png&amp;s=12693" alt="在这里插入图片描述"></li>
-<li>接着要插入C，直接插入的到F之前就行，因为在至顶向下的过程中，没有发现满节点<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e6b067113?w=285&amp;h=130&amp;f=png&amp;s=13496" alt="在这里插入图片描述"></li>
-<li>好了，下面到L了，当至顶向下的过程中，L是在Q左侧查找，发现了CFK节点是满的，必然进行拆分；<br>将中间节点F提上来，父节点个数+1，子节点个数+1, 仍然符合B树特征<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e6b8888ad?w=399&amp;h=138&amp;f=png&amp;s=17221" alt="在这里插入图片描述"></li>
-<li>拆分之后，插入L<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e6ba2da0e?w=338&amp;h=122&amp;f=png&amp;s=14030" alt="在这里插入图片描述"><br>后续的插入，就不用多讲了，重复以上过程。</li>
+<li>插入K，比如是从Q向左查找，插入到F之后。<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e6ad22fe2?w=305&amp;h=127&amp;f=png&amp;s=12693" alt></li>
+<li>接着要插入C，直接插入的到F之前就行，因为在至顶向下的过程中，没有发现满节点<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e6b067113?w=285&amp;h=130&amp;f=png&amp;s=13496" alt></li>
+<li>好了，下面到L了，当至顶向下的过程中，L是在Q左侧查找，发现了CFK节点是满的，必然进行拆分；<br>将中间节点F提上来，父节点个数+1，子节点个数+1, 仍然符合B树特征<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e6b8888ad?w=399&amp;h=138&amp;f=png&amp;s=17221" alt></li>
+<li>拆分之后，插入L<br><img src="https://user-gold-cdn.xitu.io/2019/3/20/16999f6e6ba2da0e?w=338&amp;h=122&amp;f=png&amp;s=14030" alt><br>后续的插入，就不用多讲了，重复以上过程。</li>
 </ol>
 <h3 id="写在最后，学好B树还有助于我们理解数据库设计"><a href="#写在最后，学好B树还有助于我们理解数据库设计" class="headerlink" title="写在最后，学好B树还有助于我们理解数据库设计"></a>写在最后，学好B树还有助于我们理解数据库设计</h3><p><br></p>
 <hr>
